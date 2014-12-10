@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:context="http://www.springframework.org/schema/context"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-4.0.xsd
+        					http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-4.0.xsd">
+
+	<bean id="testTask1" class="com.samuelisme.spring.task.TestTask">
+		<property name="message"><value>Hello world 1</value></property>
+	</bean>
+	<bean id="testTask2" class="com.samuelisme.spring.task.TestTask">
+		<property name="message"><value>Hello world 2</value></property>
+	</bean>
+	<bean id="testTask3" class="com.samuelisme.spring.task.TestTask">
+		<property name="message"><value>Hello world 3 by trigger listener</value></property>
+	</bean>
+	
+	<bean id="firstJobDetail" class="org.springframework.scheduling.quartz.MethodInvokingJobDetailFactoryBean">
+		<property name="targetObject" ref="testTask1" />
+		<property name="targetMethod" value="printMessage" />
+	</bean>
+	
+	<bean id="secondJobDetail" class="org.springframework.scheduling.quartz.MethodInvokingJobDetailFactoryBean">
+		<property name="targetObject" ref="testTask2" />
+		<property name="targetMethod" value="printMessage" />
+	</bean>
+	
+	<!-- Run the job every 2 seconds with start delay of 1 second -->
+	<bean id="firstTrigger"  class="org.springframework.scheduling.quartz.SimpleTriggerFactoryBean">
+		<property name="jobDetail" ref="firstJobDetail" />
+		<property name="startDelay" value="1000" />
+		<property name="repeatInterval" value="2000" />
+	</bean>
+
+	<!-- Run the job every 5 seconds with start delay of 1 second -->
+	<bean id="secondTrigger"  class="org.springframework.scheduling.quartz.SimpleTriggerFactoryBean">
+		<property name="jobDetail" ref="secondJobDetail" />
+		<property name="startDelay" value="1000" />
+		<property name="repeatInterval" value="5000" />
+	</bean>
+	
+	<bean id="testImportTask" class="com.samuelisme.spring.triggerListener.TaskObject">
+		<property name="object" ref="testTask3" />
+		<property name="className"><value>com.samuelisme.spring.task.TestTask</value></property>
+		<property name="methodName"><value>printMessage</value></property>
+	</bean>
+	
+	<bean id="taskTriggerListener" class="com.samuelisme.spring.triggerListener.TaskTriggerListener">
+		<property name="name"><value>taskTriggerListener</value></property>
+		<property name="taskObjList">
+			<list>
+				<ref bean="testImportTask" />
+			</list>
+		</property>
+	</bean>
+	
+	<!-- Scheduler factory bean to glue together jobDetails and triggers to Configure Quartz Scheduler -->
+	<bean id="schedulerFactoryBean" class="org.springframework.scheduling.quartz.SchedulerFactoryBean">
+		<property name="triggers">
+			<list>
+				<ref bean="firstTrigger" />
+				<ref bean="secondTrigger" />
+			</list>
+		</property>
+	</bean>
+
+</beans>
