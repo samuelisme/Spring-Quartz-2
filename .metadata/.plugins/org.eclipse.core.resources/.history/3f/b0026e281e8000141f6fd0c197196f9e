@@ -27,7 +27,7 @@ public class AppMain {
 			scheduler.getListenerManager().addTriggerListener(taskTriggerListener, matcher);
 		} catch (SchedulerException e) {
 			e.printStackTrace();
-			//
+			System.out.println("Program ended");
 		}
 	}
 
